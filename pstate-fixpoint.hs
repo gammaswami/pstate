@@ -5,6 +5,7 @@ import PStateBDD
 
 import Data.Boolean.CUDD
 
+import Data.List
 import qualified Data.Vector as V
 
 import Text.Printf
@@ -29,27 +30,32 @@ mkFixlist (pv, _, _) = mkfl $ V.toList pv
         mkfl ((State _ _ _ _ pi bo bi) : fs) = 
           Fix { bddo = defBDD bo
               , bddi = defBDD bi
-              , pnow = realToFrac pi
-              , pnext = realToFrac $ bddGetProb $ defBDD bo
+              , pnow = pi
+              -- , pnow = realToFrac pi
+              , pnext = bddGetProb $ defBDD bo
+              -- , pnext = realToFrac $ bddGetProb $ defBDD bo
               , fixed = False
               } : mkfl fs
         mkfl (_ : fs) = mkfl fs
         
 chLimit :: Double -> Double -> Fix -> Bool
 chLimit limH limL (Fix {pnow = pn, pnext = px}) = 
-  px == pn || ((px >= limL * pn) && (px <= limH * pn))
+  px == pn || ((px' >= limL * pn) && (px' <= limH * pn))
+  where
+    px' = px * 1000000.0
         
 calcNewFix :: Fix -> Fix
-calcNewFix f@Fix {bddo = bo, bddi = bi, pnext = px} = f {pnow = px, pnext = p'}
+calcNewFix f@Fix {bddo = bo, bddi = bi, pnext = px} = 
+  f {pnow = px, pnext = (p' :: Double)}
   where p' = case (bddSetProb bi px) of
-          0 -> realToFrac $ bddGetProb bo
+          0 -> bddGetProb bo
           _ -> error "Cannot set state probability"
 
 -- lim(it) for checking in ppm          
-chFixList :: Int -> FixL -> Bool
+chFixList :: Double -> FixL -> Bool
 chFixList lim = foldr (\f t -> chLimit limH limL f && t) True
-  where limH =  (1.0 :: Double) + (fromIntegral lim / (1000000.0 :: Double))
-        limL = (1.0 :: Double) / limH
+  where limH = 1000000.0 + lim
+        limL = 1000000.0 - lim
         
 calcFixList :: FixL -> FixL
 calcFixList = map calcNewFix
@@ -66,20 +72,21 @@ iterOne iter max lim fl | iter == max =
      hFlush stdout
      return (False, max, fl)
   
-iterOne iter max lim fl | (chFixList lim fl) =
+iterOne iter max lim fl | (chFixList (fromIntegral lim) fl) =
   do printf "\nFixpoint found after %d iterations with %d ppm accuracy.\n"
        iter lim
      hFlush stdout
      return (True, iter, fl)
   
 iterOne iter max lim fl | otherwise = 
-  let fl' = calcFixList fl in
+--  let fl' = calcFixList fl in
     do 
       putStr "\8\8\8\8\8\8\8\8\8\8\8\8" 
       printf "%12d" iter
       -- printPlist fl
       hFlush stdout
-      iterOne (iter + 1) max lim fl'    
+      -- printf "Iteration %12d:\n" iter
+      iterOne (iter + 1) max lim $ calcFixList fl    
               
 iterFixList :: Int -> [Int] -> FixL -> IO Bool
 iterFixList _ [] _ = return False
@@ -93,11 +100,11 @@ iterFixList max (lim:lims) fl =
 printP :: Fix -> IO ()
 printP (Fix {pnow = p}) =
   do print $ isInfinite p
-     printf " %5.4g, " p
+     printf " %9.8g, " p
      
 printPlist :: FixL -> IO ()
 printPlist fl = 
-  do mapM_ printP fl
+  do mapM_ printP fl  
      printf "\n"
 
 
@@ -107,21 +114,23 @@ printState (State n _ _ _ _ bddo _) =
   do printf "%s: " n
      -- print bddo
      -- print $ isInfinite p
-     printf " %5.4g\n" (p :: Double)
+     printf " %9.8g\n" p
      
 printState _ = return ()
       
 printOut :: PNetNode -> IO ()
 printOut (Out n _ _ bdd) = 
   let p = bddGetProb $ defBDD bdd in
-  do printf "%s: %5.4g\n" n (p :: Double)
+  do printf "%s: %9.8g\n" n p
      
 printOut _ = return ()
       
 printResult :: AllNet -> IO ()
 printResult (pv, _, _) =
-  do putStr "STATE PROBABILITIES:\n"
-     V.mapM_ printState pv
-     putStr "OUTPUT PROBABILITIES:\n"
-     V.mapM_ printOut pv
+  do 
+    varIndices
+    putStr "STATE PROBABILITIES:\n"
+    V.mapM_ printState pv
+    putStr "OUTPUT PROBABILITIES:\n"
+    V.mapM_ printOut pv
      
