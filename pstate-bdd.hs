@@ -75,15 +75,16 @@ eachN _ net (Local s ix Nothing) = Local s ix $ crBDD net $ net !!! ix
 eachN _ net n@(Local _ _ _) = n
 
 -- 
-eachN sP0 net (State sO sI ix po pi Nothing bddi) = 
+eachN sP0 net (State name sO sI ix po pi Nothing bddi) = 
   let bdd' = crBDD net $ net !!! ix in
   case (bddSetProb (defBDD bdd') sP0) of
-    0 -> State sO sI ix po pi bdd' bddi
+    0 -> State name sO sI ix po pi bdd' bddi
     _ -> error $ "Cannot set prob for output bdd in " ++ sO
   
-eachN _ net n@(State _ _ _ _ _ _ _) = n
-eachN _ net (Func bt sO sI ixI p Nothing) = Func bt sO sI ixI p $ crBDDf net bt ixI
-eachN _ net n@(Func _ _ _ _ _ _) = n
+eachN _ net n@(State _ _ _ _ _ _ _ _) = n
+eachN _ net (Func name bt sO sI ixI p Nothing) = 
+  Func name bt sO sI ixI p $ crBDDf net bt ixI
+eachN _ net n@(Func _ _ _ _ _ _ _) = n
                 
 crBDD :: PNetVec -> PNetNode -> MbBDD
 crBDD _ (Top _) = error "Top node where it should not be!"
@@ -94,11 +95,11 @@ crBDD _ (In s _ bdd) | bdd == Nothing = error "BDD for In node not created?"
                      | otherwise = bdd
 crBDD net (Local _ ix Nothing) = crBDD net $ net !!! ix    
 crBDD _ (Local _ _ bdd) = bdd
-crBDD net (State sO _ _ _ _ _ bddi ) 
+crBDD net (State _ sO _ _ _ _ _ bddi ) 
   | bddi == Nothing = error "BDD in State node not created?"
   | otherwise = bddi
-crBDD net (Func bt _ _ ixI _ Nothing) = crBDDf net bt ixI
-crBDD net (Func bt _ _ ixI _ bddi) = bddi
+crBDD net (Func _ bt _ _ ixI _ Nothing) = crBDDf net bt ixI
+crBDD net (Func _ bt _ _ ixI _ bddi) = bddi
 
 defBDD :: MbBDD -> BDD
 defBDD Nothing = error "Def'ing a non-existing BDD"
@@ -122,5 +123,5 @@ getBDD (Top _) = []
 getBDD (Out _ _ _ bdd) = [defBDD bdd]
 getBDD (In _ _ bdd) = [defBDD bdd]
 getBDD (Local _ _ bdd) = [defBDD bdd]
-getBDD (State _ _ _ _ _ bddo bddi) = [defBDD bddo, defBDD bddi]
-getBDD (Func _ _ _ _ _ bdd) = [defBDD bdd]
+getBDD (State _ _ _ _ _ _ bddo bddi) = [defBDD bddo, defBDD bddi]
+getBDD (Func _ _ _ _ _ _ bdd) = [defBDD bdd]

@@ -46,8 +46,8 @@ data PNetNode = Top (Int, Int, Int, Int) |
                 In String Double MbBDD |
                 Out String Int Double MbBDD | 
                 Local String Int MbBDD |   
-                Func BoolType String [String] [Int] Double MbBDD |
-                State String String Int Double Double MbBDD MbBDD
+                Func String BoolType String [String] [Int] Double MbBDD |
+                State String String String Int Double Double MbBDD MbBDD
               deriving (Show, Eq)
 
 data XNode = XNode { x :: Bool
@@ -194,7 +194,7 @@ mkPNetReg nl (net, im, mi) = (net' +++ rNet, im', mi')
         im' = D.fromList $ (D.toList im) ++ (zip r' [next ..])
         mi' = D.fromList $ (D.toList mi) ++ (zip [next ..] r')
         rNet = V.fromList $ map frN $ D.toList r
-        frN (_, (rO, rI)) = State rO rI 0 0.5 0.5 Nothing $ Just bddi'
+        frN (rName, (rO, rI)) = State rName rO rI 0 0.5 0.5 Nothing $ Just bddi'
           where bddi' = case (bddSetProb bddi 0.5) of
                   0 -> bddi
                   _ -> error $ "Cannot set input prob for " ++ rO
@@ -212,7 +212,7 @@ mkPNetGate nl (net, im, mi) = (net +++ gNet, im', mi')
         im' = D.fromList $ (D.toList im) ++ (zip g' [next ..])
         mi' = D.fromList $ (D.toList mi) ++ (zip [next ..] g')
         gNet = V.fromList $ map frG $ (D.toList g) ++ (D.toList a)
-        frG (_, (gT, gO, gI)) = Func gT gO gI [] 0.5 Nothing  
+        frG (gName, (gT, gO, gI)) = Func gName gT gO gI [] 0.5 Nothing  
 
 mkIndexNet :: AllNet -> AllNet
 mkIndexNet (net, im, mi) = (net', im, mi)
@@ -223,9 +223,9 @@ mkIndexNet (net, im, mi) = (net', im, mi)
         fix (In s f bdd) = In s f bdd
         fix (Out name _ p bdd) = Out name (ix name) p bdd
         fix (Local name _ bdd) = Local name (ix name) bdd
-        fix (State nOut nIn _ pi po bddo bddi) = 
-          State nOut nIn (ix nIn) pi po bddo bddi
-        fix (Func bT nOut nIn _ p bdd) = Func bT nOut nIn (ixs nIn) p bdd
+        fix (State name nOut nIn _ pi po bddo bddi) = 
+          State name nOut nIn (ix nIn) pi po bddo bddi
+        fix (Func name bT nOut nIn _ p bdd) = Func name bT nOut nIn (ixs nIn) p bdd
         
 mkAllNet :: Netlist -> AllNet
 mkAllNet nl = net

@@ -10,6 +10,7 @@ import qualified Data.Vector as V
 
 import Text.Printf
 import System.IO
+import Control.DeepSeq
 
 import Foreign.C
 
@@ -22,12 +23,14 @@ data Fix = Fix { bddo :: BDD
                , fixed :: Bool
                } deriving (Show, Eq)
      
+instance NFData Fix
+
 type FixL = [Fix]
 
 mkFixlist :: AllNet -> FixL
 mkFixlist (pv, _, _) = mkfl $ V.toList pv
   where mkfl [] = []
-        mkfl ((State _ _ _ _ pi bo bi) : fs) = 
+        mkfl ((State _ _ _ _ _ pi bo bi) : fs) = 
           Fix { bddo = defBDD bo
               , bddi = defBDD bi
               , pnow = pi
@@ -79,14 +82,13 @@ iterOne iter max lim fl | (chFixList (fromIntegral lim) fl) =
      return (True, iter, fl)
   
 iterOne iter max lim fl | otherwise = 
---  let fl' = calcFixList fl in
-    do 
-      putStr "\8\8\8\8\8\8\8\8\8\8\8\8" 
-      printf "%12d" iter
-      -- printPlist fl
-      hFlush stdout
-      -- printf "Iteration %12d:\n" iter
-      iterOne (iter + 1) max lim $ calcFixList fl    
+  -- let fl' = calcFixList fl in 
+  do putStr "\8\8\8\8\8\8\8\8\8\8\8\8" 
+     printf "%12d" iter
+     -- printPlist fl
+     hFlush stdout
+     -- printf "Iteration %12d:\n" iter
+     iterOne (iter + 1) max lim $!! calcFixList fl    
               
 iterFixList :: Int -> [Int] -> FixL -> IO Bool
 iterFixList _ [] _ = return False
@@ -109,9 +111,9 @@ printPlist fl =
 
 
 printState :: PNetNode -> IO ()
-printState (State n _ _ _ _ bddo _) =
+printState (State regName sigName _ _ _ _ bddo _) =
   let p = bddGetProb $ defBDD bddo in
-  do printf "%s: " n
+  do printf "%s %s " regName sigName
      -- print bddo
      -- print $ isInfinite p
      printf " %9.8g\n" p
