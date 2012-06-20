@@ -1,12 +1,12 @@
-module NetlistRead where
+module Netlist.Read where
 
-import NetlistData
+import Netlist.Data
 import Text.XML.HXT.Core
 import System.IO.Unsafe
 
 import Text.XML.HXT.Arrow.Pickle
 
-import PStateData
+import PState.Data
 
 instance XmlPickler Netlist where
   xpickle = xpNetlist

@@ -1,4 +1,4 @@
-module PStateData 
+module PState.Data 
        ( BoolType (..)
        , ToIndexMap
        , FromIndexMap
@@ -22,7 +22,7 @@ import Data.Map (keys, partition)
 
 import qualified Data.Vector as V
 
-import NetlistData
+import Netlist.Data
 
 data BoolType = BAnd | BNand | BOr | BNor | BNot | BXor | BXnor | BReg | BEq
                deriving (Show, Eq)

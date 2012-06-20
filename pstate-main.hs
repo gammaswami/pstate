@@ -6,11 +6,11 @@ import System.Console.GetOpt
 import System.IO.Unsafe
 import Text.Printf
 import Data.Boolean.CUDD
-import NetlistData
-import NetlistRead (loadNetlist)
-import PStateData
-import PStateBDD 
-import PStateFixpoint
+import Netlist.Data
+import Netlist.Read (loadNetlist)
+import PState.Data
+import PState.BDD 
+import PState.Fixpoint
 import Data.Vector ((!), forM_, toList)
 
 data Flag = List String |

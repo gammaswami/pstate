@@ -1,7 +1,7 @@
-module PStateFixpoint where
+module PState.Fixpoint where
 
-import PStateData
-import PStateBDD
+import PState.Data
+import PState.BDD
 
 import Data.Boolean.CUDD
 

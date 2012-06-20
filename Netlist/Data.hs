@@ -1,4 +1,4 @@
-module NetlistData where
+module Netlist.Data where
 
 import Data.Map (Map, fromList, toList)
  

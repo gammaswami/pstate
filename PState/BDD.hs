@@ -1,4 +1,4 @@
-module PStateBDD ( mkBDDNet
+module PState.BDD ( mkBDDNet
                  , getBDD 
                  , defBDD
                  ) where
@@ -11,7 +11,7 @@ import qualified Data.Map as M
 
 import qualified Data.Vector as V
 
-import PStateData
+import PState.Data
 
 ------------------------------------------------------------
 -- DelayNode datatype for storing info about state nodes prior values
