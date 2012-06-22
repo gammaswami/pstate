@@ -26,26 +26,32 @@ toOptListing "state" = StateS
 toOptListing "all" = AllS
 toOptListing x = error $ "Wrong option argument " ++ x ++ " for --list option"
 
-data Options = Options { optInput    :: Maybe String -- optInput    :: IO String
-                       , optOutput   :: Maybe String -- String -> IO ()
+data Options = Options { optInput    :: [String] -- optInput    :: IO String
+                       , optOutput   :: String -> IO ()
+                       , optOutfile  :: Bool
                        , optList     :: [OptListing]
+                       , optPattern  :: [String]
                        , optInstance :: Bool
                        , optNosignal :: Bool
                        , optHigh     :: [String] 
                        , optLow      :: [String] 
+                       , optPreset   :: Double
                        , optProb     :: [(Double, [String])]
                        , optRestrict :: [String] 
                        , optExclude  :: [String] 
-                       } deriving (Show)
+                       }
 
 defaultOptions :: Options
-defaultOptions = Options { optInput  = Nothing
-                         , optOutput = Nothing
+defaultOptions = Options { optInput  = []
+                         , optOutput = putStr
+                         , optOutfile = False
                          , optList = []
+                         , optPattern = []
                          , optInstance = False
                          , optNosignal = False
                          , optHigh = []
                          , optLow = []
+                         , optPreset = 0.5
                          , optProb = []
                          , optRestrict = []
                          , optExclude = []
@@ -53,7 +59,7 @@ defaultOptions = Options { optInput  = Nothing
 
 options :: [OptDescr (Options -> IO Options)]
 options = 
-  [
+  [ 
     Option ['h'] ["help"]        (NoArg showUsage) "Show this info."
   , Option ['?'] []              (NoArg showUsage) "Show this info."
   , Option ['V'] ["version"]     (NoArg showVersion)         
@@ -64,6 +70,8 @@ options =
     "Output file for probability results"
   , Option ['l'] ["list"]        (OptArg listType "TYPE")    
     "List in, out, and/or state signals"
+  , Option ['s'] ["pattern"]     (ReqArg patternList "PATTERNS")
+    "List (by -l option) only those signals that matches list of patterns"
   , Option ['I'] ["instance"]    (NoArg setInst) 
     "List instance name of register in addition to signal name"
   , Option ['N'] ["nosignal"]    (NoArg setSig) 
@@ -74,10 +82,12 @@ options =
     "Set signals in comma separated list to logic 0"
   , Option ['P'] ["probability"] (ReqArg setPList "PROB:SIGNALS")  
     "Set probability for signals in comma separated list to first arg in list"
+  , Option ['p'] ["preset"]      (ReqArg setPreset "PROBABILITY")
+    "Probability will be preset to this value except for signals in -P option list"
   , Option ['O'] ["only"]        (ReqArg setOList "SIGNALS")  
     "Limit computation to those states that influence specific output signals in list"
   , Option ['X'] ["exclude"]     (ReqArg setXList "SIGNALS")  
-    "Exclude states that only influence signals "
+    "Exclude states that only influence signals in list"
   ]
 
 showVersion _ = do
@@ -89,21 +99,32 @@ showUsage _ = do
   exitWith ExitSuccess  
   
 -- readInput arg opt = return opt { optInput = readFile arg }
-readInput arg opt = return opt { optInput = Just arg }
+readInput arg opt = return opt { optInput = optInput opt ++ [arg] }
 -- writeOutput arg opt = return opt { optOutput = writeFile arg }
-writeOutput arg opt = return opt { optOutput = Just arg }
+writeOutput arg opt = return opt { optOutput = writeFile arg 
+                                 , optOutfile = True }
 
 listType Nothing opt = return opt { optList = [AllS] } 
 listType (Just arg) opt = 
   return opt { optList = map toOptListing $ splitOneOf ";," arg }
 
+patternList arg opt = 
+  return opt { optPattern = optPattern opt ++ splitOneOf ",;" arg }
+
 setInst opt = return opt { optInstance = True }
 
 setSig opt = return opt { optNosignal = True }
 
-setHList arg opt = return opt { optHigh = optHigh opt ++ splitOneOf ";," arg }
+setHList arg opt = 
+  return opt { optHigh = optHigh opt ++ splitOneOf ";," arg }
 
-setLList arg opt = return opt { optLow = optLow opt ++ splitOneOf ";," arg }
+setLList arg opt = 
+  return opt { optLow = optLow opt ++ splitOneOf ";," arg }
+
+setPreset arg opt = let d = if (doubleCheck arg) then read arg
+                            else error "-p argument must be a real number"
+                    in
+                     return opt { optPreset = d }
 
 setPList arg opt = 
   let (dl : ll) = splitOneOf ":" arg

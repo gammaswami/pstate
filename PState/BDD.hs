@@ -34,12 +34,15 @@ data DelayNode = DN { name :: String
 -- (net,im,mi): AllNet structure in
 -- Return: AllNet structure with all bdds generated
 ------------------------------------------------------------
-mkBDDNet :: Double -> AllNet -> AllNet
-mkBDDNet stateProb0 (net, im, mi) = (net', im, mi)
+mkBDDNet :: Double -> AllNet -> IO AllNet
+mkBDDNet stateProb0 an = do 
 -- im and mi maps are unchanged
 -- net' is new PNetVec part of AllNet with bdds inserted
 -- eachN maps over each PNetNode in net Vector and creates bdds one by one
-  where net' = V.map (eachN stateProb0 net) net
+  let (net, im, mi) = an
+  let net' = V.map (eachN stateProb0 net) net
+  return (net', im, mi)
+
         
 ------------------------------------------------------------
 -- eachN: Called once for every PNetNode to either prime bdd or create

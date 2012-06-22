@@ -1,8 +1,6 @@
 module Main (main) where
 
 import Control.Monad
-import System.Environment (getArgs)
-import System.Console.GetOpt
 import System.IO.Unsafe
 import Text.Printf
 import Data.Boolean.CUDD
@@ -11,25 +9,20 @@ import Netlist.Read (loadNetlist)
 import PState.Data
 import PState.BDD 
 import PState.Fixpoint
+import PState.Options
+import PState.Output
 import Data.Vector ((!), forM_, toList)
 
-data Flag = List String |
-            High String |
-            Low String |
-            Prob String |
-            Inputfile String
-
-main =
-  let args = unsafePerformIO getArgs
-      nl = unsafePerformIO $ loadNetlist $ head args      
-      s0 = if length args == 2 then 
-             read $ head $ tail args 
-           else 0.5
-      ma = mkAllNet nl
-      an = mkBDDNet s0 ma
-      fl = mkFixlist an
-  in
-   do printf "State variable fixpoint priming: %f\n" s0
-      b <- iterFixList 1000 [1,2,5,10] fl
-      if b  then printResult an else return ()
-      return ()
+main = do 
+  (opts, noopts) <- processOptions
+  -- printf "State variable fixpoint priming: %f\n" s0
+  nl <- loadNetlist $ head $ optInput opts      
+  ma <- mkAllNet nl
+  an <- mkBDDNet (optPreset opts) ma
+  fl <- mkFixlist an
+  b <- iterFixList 1000 [1,2,5,10] fl
+  if b && (optOutfile opts) then 
+    (optOutput opts) $ textOutput an opts 
+    else 
+    if b then printResult an else return ()
+  return ()

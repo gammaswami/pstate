@@ -4,9 +4,9 @@ module PState.Data
        , FromIndexMap
        , MbBDD
        , PNetNode (..)
-       , XNode
+       -- , XNode
        , PNetVec
-       , XPNetVec
+       -- , XPNetVec
        , AllNet
        , mkAllNet
        )
@@ -50,16 +50,16 @@ data PNetNode = Top (Int, Int, Int, Int) |
                 State String String String Int Double Double MbBDD MbBDD
               deriving (Show, Eq)
 
-data XNode = XNode { x :: Bool
-                   , v :: Bool 
-                   }
-           deriving (Show, Eq)
+-- data XNode = XNode { x :: Bool
+--                    , v :: Bool 
+--                    }
+--            deriving (Show, Eq)
 
-type XPNetNode = (PNetNode, XNode)
+-- type XPNetNode = (PNetNode, XNode)
 
 type PNetVec = V.Vector PNetNode
 
-type XPNetVec = V.Vector XPNetNode
+-- type XPNetVec = V.Vector XPNetNode
 
 type AllNet = (PNetVec, ToIndexMap String, FromIndexMap String)
 
@@ -227,8 +227,8 @@ mkIndexNet (net, im, mi) = (net', im, mi)
           State name nOut nIn (ix nIn) pi po bddo bddi
         fix (Func name bT nOut nIn _ p bdd) = Func name bT nOut nIn (ixs nIn) p bdd
         
-mkAllNet :: Netlist -> AllNet
-mkAllNet nl = net
+mkAllNet :: Netlist -> IO AllNet
+mkAllNet nl = return net
   where ms = mkPNetSig nl
         mr = mkPNetReg nl ms
         mg = mkPNetGate nl mr

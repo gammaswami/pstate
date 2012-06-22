@@ -27,8 +27,8 @@ instance NFData Fix
 
 type FixL = [Fix]
 
-mkFixlist :: AllNet -> FixL
-mkFixlist (pv, _, _) = mkfl $ V.toList pv
+mkFixlist :: AllNet -> IO FixL
+mkFixlist (pv, _, _) = return $ mkfl $ V.toList pv
   where mkfl [] = []
         mkfl ((State _ _ _ _ _ pi bo bi) : fs) = 
           Fix { bddo = defBDD bo
@@ -45,7 +45,7 @@ chLimit :: Double -> Double -> Fix -> Bool
 chLimit limH limL (Fix {pnow = pn, pnext = px}) = 
   px == pn || ((px' >= limL * pn) && (px' <= limH * pn))
   where
-    px' = px * 1000000.0
+    px' = px * 1000000000000.0
         
 calcNewFix :: Fix -> Fix
 calcNewFix f@Fix {bddo = bo, bddi = bi, pnext = px} = 
@@ -57,15 +57,15 @@ calcNewFix f@Fix {bddo = bo, bddi = bi, pnext = px} =
 -- lim(it) for checking in ppm          
 chFixList :: Double -> FixL -> Bool
 chFixList lim = foldr (\f t -> chLimit limH limL f && t) True
-  where limH = 1000000.0 + lim
-        limL = 1000000.0 - lim
+  where limH = 1000000000000.0 + lim
+        limL = 1000000000000.0 - lim
         
 calcFixList :: FixL -> FixL
 calcFixList = map calcNewFix
         
 iterOne :: Int -> Int -> Int -> FixL -> IO (Bool, Int, FixL)
 iterOne 0 max lim fl =  
-  do printf "Trying %d iterations at %d ppm accuracy.\n" max lim
+  do printf "Trying %d iterations at %d ppt accuracy.\n" max lim
      printf "Iteration: %12d" (0 :: Int)
      hFlush stdout
      iterOne 1 max lim fl
