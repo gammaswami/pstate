@@ -1,0 +1,13 @@
+COMPILATION INSTRUCTIONS:
+
+- To come
+
+INSTALLATION INSTRUCTIONS
+
+1) Install the pstate program in a typical path-defined directory such as /usr/local/bin
+
+2) Install the libcudd.so.1 shared library in a library directory for shared libraries. Safest is /usr/lib.
+
+3) Run the ldconfig command to set up the shared library
+
+4) Install the manual file pstate.1 in some system manual directory such as /usr/share/man/man1
