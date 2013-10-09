@@ -174,6 +174,8 @@ mkPNetSig nl = (pNet, D.fromList tim, D.fromList $ map swap tim)
                (V.fromList ((map f1 $ fs SIn s) ++ 
                             (map f2 $ fs SOut s) ++ 
                             (map f3 $ fs SLocal s)))
+        -- f1 name = In name 0.5 Nothing
+        -- Defer bdd creation until later when we know the preset conditions
         f1 name = case (bddSetProb bdd 0.5) of
                        0 -> In name 0.5 $ Just bdd  
                        _ -> error $ "Cannot create bdd for " ++ name

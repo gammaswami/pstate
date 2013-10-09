@@ -1,0 +1,36 @@
+diff -r -N -x '*~' -x .git ./hBDD-CUDD/Data/Boolean/CUDD.chs ../hBDD/hBDD-CUDD/Data/Boolean/CUDD.chs
+24,25d23
+<     ,   bddSetProb
+<     ,   bddGetProb
+48d45
+< import Foreign.C.Types
+57,58d53
+< import Text.Printf
+< 
+192c187
+<              do -- putStrLn $ "Allocating: " ++ label
+---
+>              do putStrLn $ "Allocating: " ++ label
+443,464d437
+< 
+< 
+< ----------------------------------------
+< -- BDD probabilities
+< ----------------------------------------
+< 
+< bddSetProb :: BDD -> Double -> Integer
+< bddSetProb bdd p = unsafePerformIO $
+<                    do val <- withBDD
+<                              bdd
+<                              (\bddp -> 
+<                                ({#call unsafe Cudd_SetProb as _cudd_SetProb#}
+<                                 ddmanager bddp ((realToFrac p) :: CDouble)))
+<                       -- printf "bddSetProb: %9.8g\n" p
+<                       return $ toInteger val
+< 
+< bddGetProb :: BDD -> Double
+< bddGetProb bdd = unsafePerformIO $
+<                  do p <- withBDD bdd ({#call unsafe Cudd_GetProb as _cudd_GetProb#}
+<                                       ddmanager)
+<                     -- printf "bddGetProb: %9.8g\n" ((realToFrac p) :: Double)
+<                     return $ realToFrac (p :: CDouble)

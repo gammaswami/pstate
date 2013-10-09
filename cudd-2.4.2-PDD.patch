@@ -1,0 +1,273 @@
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./cudd/cuddAPI.c ../cudd-2.4.2/cudd/cuddAPI.c
+327,331d326
+< #ifdef PDD
+<     /* int pindex = 2*(res->index); */
+<     /* dd->probabilities[pindex] = dd->probabilities[pindex+1] = 0.5; */
+< #endif
+< 
+362,366d356
+< 
+< #ifdef PDD
+<     /* int pindex = 2*(res->index); */
+<     /* dd->probabilities[pindex] = dd->probabilities[pindex+1] = 0.5; */
+< #endif
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./cudd/cudd.h ../cudd-2.4.2/cudd/cudd.h
+95,98d94
+< #ifdef PDD
+< #define CUDD_PROB_TYPE          double
+< #define PNUM_MAX                (1<<24)
+< #endif
+290,292d285
+< /* #ifdef PDD */
+< /*     CUDD_PROB_TYPE Pin, Pnode;  */
+< /* #endif */
+1053,1054d1045
+< extern int Cudd_SetProb (DdManager * m, DdNode * f, double p);
+< extern double Cudd_GetProb (DdManager * m, DdNode* f);
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./cudd/cuddInit.c ../cudd-2.4.2/cudd/cuddInit.c
+62,65d61
+< #ifdef PDD
+< static double allProbs[PNUM_MAX];
+< #endif
+< 
+147,149d142
+< #ifdef PDD
+<     unique->probabilities = allProbs;
+< #endif
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./cudd/cuddInt.h ../cudd-2.4.2/cudd/cuddInt.h
+356,358d355
+< #ifdef PDD
+<     double * probabilities;        /* for variable and node probabilities */
+< #endif
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./cudd/cuddPDD.c ../cudd-2.4.2/cudd/cuddPDD.c
+1,87d0
+< /* Specific macros and functions for manipulating Probability in BDDs */
+< 
+< #include "util.h"
+< #include "cuddInt.h"
+< 
+< #define PNUM(node) ((node->index) % PNUM_MAX)
+< #define CUDDPI(m,node) ((m->probabilities[PNUM(node)]))
+< 
+< 
+< /* Recursive calculation of a node's output probability
+<    as the input weighted sum of the T & E node's output
+<    probability */
+< double Cudd_CompProb (DdManager* m, 
+< 		     DdNode * f) {
+<     DdNode * one, * zero;
+<     DdNode * F;
+<     DdNode * t, * e;
+<     int comp;
+<     double pt, pe, pn, w;
+< 
+<     comp = Cudd_IsComplement (f);
+<     one = DD_ONE (m);
+<     zero = DD_ZERO (m);
+< 
+<     if (comp)
+< 	F = Cudd_Regular (f);
+<     else
+< 	F = f;
+< 	    
+< 
+<     /* if ((F == one && (Cudd_IsComplement (f))) */
+<     /* 	|| f == zero) return 0.0; */
+<     /* else if (f == one) return 1.0; */
+<     if (Cudd_IsConstant (f)) {
+< 	if (comp)
+< 	    return 1.0 - Cudd_V (f);
+< 	else
+< 	    return Cudd_V (f);
+<     }
+<     else {
+< 	t = Cudd_T(F);
+< 	e = Cudd_E(F);
+< 	pt = Cudd_CompProb (m, t);
+< 	pe = Cudd_CompProb (m, e);
+< 	if (comp)
+< 	    w = CUDDPI(m,F);
+< 	else
+< 	    w = CUDDPI(m,f);
+< #ifdef DEBUG
+< 	printf ("Getting PI=%f at %d\n", w, PNUM(f));
+< #endif
+< 	/* if (w == 0.0) { */
+< 	/*     w = 0.5; */
+< 	/*     CUDDPI(m,f) = w; */
+< 	/* } */
+< 
+< 	pn = w*pt + (1.0 - w)*pe;
+< 	if (comp) pn = 1.0 - pn;
+< 	return pn;
+<     }
+< }
+< 
+< /* Set the variable input probability */
+< int Cudd_SetProb (DdManager * m,
+< 		       DdNode * f, 
+< 		       double pin) {
+<     /* DdNode * F; */
+<     /* F = Cudd_Regular (f); */
+<     
+<     CUDDPI(m,f) = pin;
+< #ifdef DEBUG
+<     printf ("Setting PI=%f at %d\n", pin, PNUM(f));
+< #endif
+<     return 0;
+< }
+< 
+< /* calculate and return the node's output probability */
+< double Cudd_GetProb (DdManager * m, 
+< 		    DdNode* f) {
+<     double p;
+<     /* DdNode * F; */
+<     /* F = Cudd_Regular (f); */
+<     
+<     p = Cudd_CompProb (m, f);
+< 
+<     return p;
+< }
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./cudd/cuddTable.c ../cudd-2.4.2/cudd/cuddTable.c
+1267,1274d1266
+< #ifdef PDD
+<     /* int pindex = ((looking->index) % PNUM_MAX); */
+<     /* unique->probabilities[pindex] = unique->probabilities[pindex] = 0.5; */
+< #ifdef DEBUG
+<     /* printf ("Creating PI=0.5 at %d\n",pindex); */
+< #endif
+< #endif
+< 
+diff -r -N '--exclude=*o' '--exclude=*~' '--exclude=*.a' '--exclude=.git' -x Makefile ./util/cpu_stats.c ../cudd-2.4.2/util/cpu_stats.c
+24,86c24,86
+< /* #ifdef BSD */
+< /*     struct rusage rusage; */
+< /*     struct rlimit rlp; */
+< /*     long text, data, vm_limit, vm_soft_limit; */
+< /*     double user, system, scale; */
+< /*     char hostname[257]; */
+< /*     long vm_text, vm_init_data, vm_uninit_data, vm_sbrk_data; */
+< 
+< /*     /\* Get the hostname *\/ */
+< /*     (void) gethostname(hostname, 256); */
+< /*     hostname[256] = '\0';		/\* just in case *\/ */
+< 
+< /*     /\* Get the virtual memory sizes *\/ */
+< /*     vm_text = (long) (((long) (&etext)) / 1024.0 + 0.5); */
+< /*     vm_init_data = (long) (((long) (&edata) - (long) (&etext)) / 1024.0 + 0.5); */
+< /*     vm_uninit_data = (long) (((long) (&end) - (long) (&edata)) / 1024.0 + 0.5); */
+< /*     vm_sbrk_data = (long) (((long) sbrk(0) - (long) (&end)) / 1024.0 + 0.5); */
+< 
+< /*     /\* Get virtual memory limits *\/ */
+< /*     (void) getrlimit(RLIMIT_DATA, &rlp); */
+< /*     vm_limit = (long) (rlp.rlim_max / 1024.0 + 0.5); */
+< /*     vm_soft_limit = (long) (rlp.rlim_cur / 1024.0 + 0.5); */
+< 
+< /*     /\* Get usage stats *\/ */
+< /*     (void) getrusage(RUSAGE_SELF, &rusage); */
+< /*     user = rusage.ru_utime.tv_sec + rusage.ru_utime.tv_usec/1.0e6; */
+< /*     system = rusage.ru_stime.tv_sec + rusage.ru_stime.tv_usec/1.0e6; */
+< /*     scale = (user + system)*100.0; */
+< /*     if (scale == 0.0) scale = 0.001; */
+< 
+< /*     (void) fprintf(fp, "Runtime Statistics\n"); */
+< /*     (void) fprintf(fp, "------------------\n"); */
+< /*     (void) fprintf(fp, "Machine name: %s\n", hostname); */
+< /*     (void) fprintf(fp, "User time   %6.1f seconds\n", user); */
+< /*     (void) fprintf(fp, "System time %6.1f seconds\n\n", system); */
+< 
+< /*     text = (int) (rusage.ru_ixrss / scale + 0.5); */
+< /*     data = (int) ((rusage.ru_idrss + rusage.ru_isrss) / scale + 0.5); */
+< /*     (void) fprintf(fp, "Average resident text size       = %5ldK\n", text); */
+< /*     (void) fprintf(fp, "Average resident data+stack size = %5ldK\n", data); */
+< /*     (void) fprintf(fp, "Maximum resident size            = %5ldK\n\n", */
+< /* 	rusage.ru_maxrss/2); */
+< /*     (void) fprintf(fp, "Virtual text size                = %5ldK\n", */
+< /* 	vm_text); */
+< /*     (void) fprintf(fp, "Virtual data size                = %5ldK\n", */
+< /* 	vm_init_data + vm_uninit_data + vm_sbrk_data); */
+< /*     (void) fprintf(fp, "    data size initialized        = %5ldK\n", */
+< /* 	vm_init_data); */
+< /*     (void) fprintf(fp, "    data size uninitialized      = %5ldK\n", */
+< /* 	vm_uninit_data); */
+< /*     (void) fprintf(fp, "    data size sbrk               = %5ldK\n", */
+< /* 	vm_sbrk_data); */
+< /*     (void) fprintf(fp, "Virtual memory limit             = %5ldK (%ldK)\n\n", */
+< /* 	vm_soft_limit, vm_limit); */
+< 
+< /*     (void) fprintf(fp, "Major page faults = %ld\n", rusage.ru_majflt); */
+< /*     (void) fprintf(fp, "Minor page faults = %ld\n", rusage.ru_minflt); */
+< /*     (void) fprintf(fp, "Swaps = %ld\n", rusage.ru_nswap); */
+< /*     (void) fprintf(fp, "Input blocks = %ld\n", rusage.ru_inblock); */
+< /*     (void) fprintf(fp, "Output blocks = %ld\n", rusage.ru_oublock); */
+< /*     (void) fprintf(fp, "Context switch (voluntary) = %ld\n", rusage.ru_nvcsw); */
+< /*     (void) fprintf(fp, "Context switch (involuntary) = %ld\n", rusage.ru_nivcsw); */
+< /* #else */
+---
+> #ifdef BSD
+>     struct rusage rusage;
+>     struct rlimit rlp;
+>     long text, data, vm_limit, vm_soft_limit;
+>     double user, system, scale;
+>     char hostname[257];
+>     long vm_text, vm_init_data, vm_uninit_data, vm_sbrk_data;
+> 
+>     /* Get the hostname */
+>     (void) gethostname(hostname, 256);
+>     hostname[256] = '\0';		/* just in case */
+> 
+>     /* Get the virtual memory sizes */
+>     vm_text = (long) (((long) (&etext)) / 1024.0 + 0.5);
+>     vm_init_data = (long) (((long) (&edata) - (long) (&etext)) / 1024.0 + 0.5);
+>     vm_uninit_data = (long) (((long) (&end) - (long) (&edata)) / 1024.0 + 0.5);
+>     vm_sbrk_data = (long) (((long) sbrk(0) - (long) (&end)) / 1024.0 + 0.5);
+> 
+>     /* Get virtual memory limits */
+>     (void) getrlimit(RLIMIT_DATA, &rlp);
+>     vm_limit = (long) (rlp.rlim_max / 1024.0 + 0.5);
+>     vm_soft_limit = (long) (rlp.rlim_cur / 1024.0 + 0.5);
+> 
+>     /* Get usage stats */
+>     (void) getrusage(RUSAGE_SELF, &rusage);
+>     user = rusage.ru_utime.tv_sec + rusage.ru_utime.tv_usec/1.0e6;
+>     system = rusage.ru_stime.tv_sec + rusage.ru_stime.tv_usec/1.0e6;
+>     scale = (user + system)*100.0;
+>     if (scale == 0.0) scale = 0.001;
+> 
+>     (void) fprintf(fp, "Runtime Statistics\n");
+>     (void) fprintf(fp, "------------------\n");
+>     (void) fprintf(fp, "Machine name: %s\n", hostname);
+>     (void) fprintf(fp, "User time   %6.1f seconds\n", user);
+>     (void) fprintf(fp, "System time %6.1f seconds\n\n", system);
+> 
+>     text = (int) (rusage.ru_ixrss / scale + 0.5);
+>     data = (int) ((rusage.ru_idrss + rusage.ru_isrss) / scale + 0.5);
+>     (void) fprintf(fp, "Average resident text size       = %5ldK\n", text);
+>     (void) fprintf(fp, "Average resident data+stack size = %5ldK\n", data);
+>     (void) fprintf(fp, "Maximum resident size            = %5ldK\n\n",
+> 	rusage.ru_maxrss/2);
+>     (void) fprintf(fp, "Virtual text size                = %5ldK\n",
+> 	vm_text);
+>     (void) fprintf(fp, "Virtual data size                = %5ldK\n",
+> 	vm_init_data + vm_uninit_data + vm_sbrk_data);
+>     (void) fprintf(fp, "    data size initialized        = %5ldK\n",
+> 	vm_init_data);
+>     (void) fprintf(fp, "    data size uninitialized      = %5ldK\n",
+> 	vm_uninit_data);
+>     (void) fprintf(fp, "    data size sbrk               = %5ldK\n",
+> 	vm_sbrk_data);
+>     (void) fprintf(fp, "Virtual memory limit             = %5ldK (%ldK)\n\n",
+> 	vm_soft_limit, vm_limit);
+> 
+>     (void) fprintf(fp, "Major page faults = %ld\n", rusage.ru_majflt);
+>     (void) fprintf(fp, "Minor page faults = %ld\n", rusage.ru_minflt);
+>     (void) fprintf(fp, "Swaps = %ld\n", rusage.ru_nswap);
+>     (void) fprintf(fp, "Input blocks = %ld\n", rusage.ru_inblock);
+>     (void) fprintf(fp, "Output blocks = %ld\n", rusage.ru_oublock);
+>     (void) fprintf(fp, "Context switch (voluntary) = %ld\n", rusage.ru_nvcsw);
+>     (void) fprintf(fp, "Context switch (involuntary) = %ld\n", rusage.ru_nivcsw);
+> #else
+88c88
+< /* #endif */
+---
+> #endif
