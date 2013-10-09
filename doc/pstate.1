@@ -43,6 +43,23 @@ Limit computation to those states that influence specific output signals in list
 .TP
 \fB\-X\fR SIGNALS       \fB\-\-exclude\fR=\fISIGNALS\fR
 Exclude states that only influence signals
+.SH "INPUT FILE FORMAT"
+The
+.B pstate
+program expects an input file on the 
+.B hxml
+format. These files are produced from 
+.B vsyml
+output files using the
+.B haskell-xml.xsl
+filter script. The command format is
+.IP
+.B xsltproc (some_path)/haskell-xml.xsl vsymfile.xml pstatefile.hxml
+.PP
+where you should change the path and filenames to your needs. You can
+also add an alias such as
+.IP
+.B alias hxmlify='xsltproc ~/scripts/haskell-xml.xsl'
 .SH "SEE ALSO"
 The full documentation for
 .B pstate

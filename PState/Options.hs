@@ -26,6 +26,8 @@ toOptListing "state" = StateS
 toOptListing "all" = AllS
 toOptListing x = error $ "Wrong option argument " ++ x ++ " for --list option"
 
+type ProbList = [(Double, [String])]
+
 data Options = Options { optInput    :: [String] -- optInput    :: IO String
                        , optOutput   :: String -> IO ()
                        , optOutfile  :: Bool
@@ -36,7 +38,7 @@ data Options = Options { optInput    :: [String] -- optInput    :: IO String
                        , optHigh     :: [String] 
                        , optLow      :: [String] 
                        , optPreset   :: Double
-                       , optProb     :: [(Double, [String])]
+                       , optProb     :: ProbList
                        , optRestrict :: [String] 
                        , optExclude  :: [String] 
                        }
@@ -68,25 +70,32 @@ options =
     "HXML input file to read"    
   , Option ['o'] ["output"]      (ReqArg writeOutput "FILE") 
     "Output file for probability results"
-  , Option ['l'] ["list"]        (OptArg listType "TYPE")    
+    -- , Option ['l'] ["list"]        (OptArg listType "TYPE")    
+  , Option ['l'] ["list"]        (NoArg $ notImplemented "-l")    
     "List in, out, and/or state signals"
-  , Option ['s'] ["pattern"]     (ReqArg patternList "PATTERNS")
+    -- , Option ['s'] ["pattern"]     (ReqArg patternList "PATTERNS")
+  , Option ['s'] ["pattern"]     (NoArg $ notImplemented "-s")
     "List (by -l option) only those signals that matches list of patterns"
   , Option ['I'] ["instance"]    (NoArg setInst) 
     "List instance name of register in addition to signal name"
   , Option ['N'] ["nosignal"]    (NoArg setSig) 
     "Do not list signal name of register, only instance name"
-  , Option ['H'] ["high"]        (ReqArg setHList "SIGNALS")  
+    -- , Option ['H'] ["high"]        (ReqArg setHList "SIGNALS")  
+  , Option ['H'] ["high"]        (NoArg $ notImplemented "-H")
     "Set signals in comma separated list to logic 1"
-  , Option ['L'] ["low"]         (ReqArg setLList "SIGNALS")  
+    -- , Option ['L'] ["low"]         (ReqArg setLList "SIGNALS")  
+  , Option ['L'] ["low"]         (NoArg $ notImplemented "-L")
     "Set signals in comma separated list to logic 0"
-  , Option ['P'] ["probability"] (ReqArg setPList "PROB:SIGNALS")  
+    -- , Option ['P'] ["probability"] (ReqArg setPList "PROB:SIGNALS")  
+  , Option ['P'] ["probability"] (NoArg $ notImplemented "-P")
     "Set probability for signals in comma separated list to first arg in list"
   , Option ['p'] ["preset"]      (ReqArg setPreset "PROBABILITY")
     "Probability will be preset to this value except for signals in -P option list"
-  , Option ['O'] ["only"]        (ReqArg setOList "SIGNALS")  
+    -- , Option ['O'] ["only"]        (ReqArg setOList "SIGNALS")  
+  , Option ['O'] ["only"]        (NoArg $ notImplemented "-O")
     "Limit computation to those states that influence specific output signals in list"
-  , Option ['X'] ["exclude"]     (ReqArg setXList "SIGNALS")  
+    -- , Option ['X'] ["exclude"]     (ReqArg setXList "SIGNALS")  
+  , Option ['X'] ["exclude"]     (NoArg $ notImplemented "-X")
     "Exclude states that only influence signals in list"
   ]
 
@@ -98,6 +107,10 @@ showUsage _ = do
   putStrLn $ usageInfo "pstate -- compute post-synthesis state probabilities" options
   exitWith ExitSuccess  
   
+notImplemented opt _ = do
+  putStrLn $ opt ++ ": Option not yet implemented"
+  exitWith ExitSuccess
+
 -- readInput arg opt = return opt { optInput = readFile arg }
 readInput arg opt = return opt { optInput = optInput opt ++ [arg] }
 -- writeOutput arg opt = return opt { optOutput = writeFile arg }

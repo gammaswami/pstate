@@ -1,0 +1,103 @@
+* Install cabal and ghc 7.4.1
+
+* Install haskell platform and profiling libs:
+
+  sudo apt-get install haskell-platform
+  sudo apt-get install haskell-platform-prof 
+
+* If installing pstate, install pstate from git-hub.
+
+* Install cudd version 2.4.2
+
+* If installing pstate, apply cudd-pdd.patch from pstate main directory in
+  cudd's subdir named cudd
+
+* Install hBDD from git-hub.
+
+* If installing pstate, apply hBDD-pdd.patch from pstate main
+  directory in hBDD's hBDD-CUDD/Data subdir.
+
+* If compiling for 32-bit standard linux kernel, use the 
+
+  XCFLAGS      = -DHAVE_IEEE_754 -DBSD
+
+  option. If installing pstate, make new option
+
+  ICFLAGS	= -g -O6 -DPDD
+
+  in the cudd main Makefile
+
+* compile and install cudd:
+
+  make
+  make install
+
+* make a lib dir in cudd for all the static libs:
+
+  mkdir lib
+  ln -s */*.a lib
+
+* create shared lib in cudd/lib dir using the hBDD supplied script:
+
+  cd lib; sh -x ../../hBDD/hBDD-CUDD/create-cudd-so.sh
+
+  or whatever path to hBDD is right in your installation
+
+* Install shared cudd-lib:
+
+  sudo cp libcudd.so.1 /usr/lib/
+  sudo ldconfig
+
+* Install c2hs:
+
+  sudo apt-get install c2hs
+
+* Move to hBDD main dir and configure it:
+
+  runghc Setup configure --user -p --enable-library-profiling \
+  --ghc-option=-auto-all --ghc-option=-caf-all \
+  --extra-include-dirs=/home/kjetil/src/cudd-2.4.2/include \
+  --extra-lib-dirs=/home/kjetil/src/cudd-2.4.2/lib
+
+  Change the extra-dirs to what is right for your cudd installation
+
+* Build and install it:
+
+  runghc Setup build
+  runghc Setup install
+
+* Move to the hBDD-CUDD subdir and repeat the exact same configure,
+  build and install command
+
+* Check it out in the ghc interpreter
+
+  ghci -package hBDD-CUDD
+
+  lists all the loading libs. Now load the BDD overloaded booleans:
+
+  :m +Data.Boolean.CUDD
+
+  and test it out with a bdd variable named "a":
+
+  bvar "a" :: BDD
+
+  produces 'a'
+  
+  (bvar "a" :: BDD) /\ true
+
+  produces 'a'
+  
+  (bvar "a" :: BDD) /\ false
+
+  produces 'False'
+  
+  (bvar "a" :: BDD) \/ true
+
+  produces 'True'
+
+  (bvar "a" :: BDD) \/ false
+
+  produces 'a'
+
+* Now you can use with the ghc compiler as long as you include the
+  Data.Boolean.CUDD lib
