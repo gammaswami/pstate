@@ -204,3 +204,13 @@ loadNetlist file
             )
       return p2
       
+storeNetlist :: Netlist -> String -> IO ()
+storeNetlist nl file
+  = do 
+    runX ( constA nl
+           >>>
+           xpickleDocument xpNetlist
+           [ withIndent yes        -- indent XML
+           ] file
+         )
+    return ()
