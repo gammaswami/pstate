@@ -1,0 +1,10 @@
+The rfsm program generates a random state machine with the specified
+number of inputs, outputs, binary state vector, and implicants in the
+boolean equations. The FSM is output as an hxml formatted file to the
+optional filename, or to standard output if filename not not given.
+
+Usage: rfsm nr-ins nr-outs nr-state-bits nr-implicants [filename]
+
+Compiling the program:
+
+ghc -o rfsm rfsm-main.hs

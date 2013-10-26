@@ -1,6 +1,10 @@
 COMPILATION INSTRUCTIONS:
 
-- To come
+See the INSTALL-IT-ALL file.
+
+Compile the pstate code by the command:
+
+ghc -o pstate pstate-main.hs
 
 INSTALLATION INSTRUCTIONS
 

@@ -9,7 +9,12 @@ import Netlist.Read
 import RFSM.Gen
 
 usage = do
-  putStrLn "Usage: rfsm nr-in nr-out nr-state nr-implicant [filename]"
+  putStrLn "Usage: rfsm nr-ins nr-outs nr-state-bits nr-implicants [filename]"
+  putStrLn "  Generates a random state machine with the specified number of"
+  putStrLn "  inputs, outputs, binary state vector, and implicants in the" 
+  putStrLn "  boolean equations. The FSM is output as an hxml formatted file"
+  putStrLn "  to the optional filename, or to standard output if filename not"
+  putStrLn "  not given."
   exitWith ExitSuccess
 
 undef (Just x) = x
