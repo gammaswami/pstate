@@ -32,16 +32,23 @@ therest x f = do
         nl = mkNetlist rfsm
     storeNetlist nl f
     
+-- Parse command line list of strings into Maybe List of strings
+-- n is the expected number of Ints
 gInt :: Int -> [String] -> Maybe [Int]
+-- No expected Ints left, return Just []
+gInt 0 _ = Just []
+-- Oh, oh, not enough command line arguments that match as Ints: return Nothing
 gInt _ [] = Nothing
-gInt 1 (s:_) = case x of
-  [] -> Nothing
-  [(n, _)] -> Just [n]
-  where
-    x = reads s :: [(Int,String)]
+-- reads one expected Int from s and check it, and also assume that gInt
+-- parses rest of command arguments ss and check the result of that also
+-- (in the tuple match)
 gInt n (s:ss) = case (x,is) of
+  -- x reads into [], no Int found, return []
   ([],_) -> Nothing
+  -- gInt returns Nothing from parsing ss, return Nothing
   (_,Nothing) -> Nothing
+  -- reads found Int n, cons it with is', the gInt parse result of ss 
+  -- (which is not Nothing since we already checked that above
   ([(n,_)],Just is') -> Just (n:is')
   where
     x = reads s :: [(Int,String)]

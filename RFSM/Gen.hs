@@ -7,7 +7,6 @@ import System.IO.Unsafe
 
 import Netlist.Data
 import Netlist.Read
--- import PState.Data
 
 type Term = V.Vector Int
 type Plane = V.Vector Term
