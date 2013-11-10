@@ -88,7 +88,7 @@ mkAndCompGates r = (ac, ag)
 mkOrCompGates :: RFSM -> (Components, Gates)
 mkOrCompGates r = (oc, og)
   where
-    (nins, og) = mkOCG (soP r) (nrX r) (V.toList $ oPlane r)
+    (nins, og) = mkOCG (soP r) (nrO r) (nrX r) (V.toList $ oPlane r)
     oc = map (\n -> crComp ("OR" ++ show n) "or" n) nins
 
 mkACG :: Int -> Int -> Int -> [Term] -> ([Int], Gates)
@@ -96,18 +96,29 @@ mkACG 0 _ _ _ = ([], [])
 mkACG _ _ _ [] = error "mkAndCompGates: Too few Terms"
 mkACG nands nin nst (t : ts) = (newin `uCons` oldins, newg : oldgs)
   where
-    (newin, conns) = mkAndPorts nin nst t
+    (newin, conns') = mkAndPorts nin nst t
+    -- And, need output signal connection
+    conns = (Connection "Q" ("A" ++ show nands)) : conns'
     newg = crGate2 ("AND" ++ show nands) "AND" newin conns
     (oldins, oldgs) = mkACG (nands - 1) nin nst ts
     
-mkOCG :: Int -> Int -> [Term] -> ([Int], Gates)
-mkOCG 0 _ _ = ([], [])
-mkOCG _ _ [] = error "mkOrCompGates: Too few Terms"
-mkOCG nors nimp (t : ts) = (newin `uCons` oldins, newg : oldgs)
+mkOCG :: Int -> Int -> Int -> [Term] -> ([Int], Gates)
+mkOCG 0 _ _ _ = ([], [])
+mkOCG _ _ _ [] = error "mkOrCompGates: Too few Terms"
+mkOCG nors nout nimp (t : ts) = (newin `uCons` oldins, newg : oldgs)
   where
-    (newin, conns) = mkOrPorts nimp t
+    (newin, conns') = mkOrPorts nimp t
+    -- And, need output signal connection
+    conns = (mkOrOutput nors nout) : conns'
     newg = crGate2 ("OR" ++ show nors) "OR" newin conns
-    (oldins, oldgs) = mkOCG (nors - 1) nimp ts
+    (oldins, oldgs) = mkOCG (nors - 1) nout nimp ts
+
+
+mkOrOutput :: Int -> Int -> Connection
+mkOrOutput nors nout | nors - nout > 0 =
+  Connection "Q" ("NS" ++ show (nors - nout))
+                     | otherwise =
+    Connection "Q" ("O" ++ show nors)
 
 uCons :: Eq a => a -> [a] -> [a]
 uCons x [] = [x]
