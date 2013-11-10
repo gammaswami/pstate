@@ -6,7 +6,7 @@ import System.IO.Unsafe
 
 import Text.XML.HXT.Arrow.Pickle
 
-import PState.Data
+-- import PState.Data
 
 instance XmlPickler Netlist where
   xpickle = xpNetlist
