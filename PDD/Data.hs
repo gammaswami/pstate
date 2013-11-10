@@ -6,10 +6,10 @@ import Data.Boolean.CUDD
 
 type PDDMap = M.Map BDD Double 
 
-data PDD = Node BDD PDD PDD | 
-           Sum PDD PDD |
-           One Double | 
-           Zero
+data PDD = Node BDD PDD PDD | -- BDD variable node with true and false trees
+           Sum PDD PDD |      -- non-variable sum-node of true and false trees
+           One Double |       -- true node with probability weight
+           Zero               -- false node, always 0 probability
          deriving (Show)
 
 evalP :: PDDMap -> PDD -> Double
