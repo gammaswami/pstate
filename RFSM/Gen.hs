@@ -127,19 +127,19 @@ uCons x l = if (elem x l) then l else x : l
 mkRegCompGates :: Int -> (Components, Registers)
 mkRegCompGates nreg = ([c], is)
   where
-    c = crComp "REG" "state" 1
+    c = crComp' "REG" "state"
     is = map mks [1 .. nreg]
-    mks n = crReg "REG" n [ Connection "D1" ("NS" ++ show n)
+    mks n = crReg "REG" n [ Connection "D" ("NS" ++ show n)
                            , Connection "Q" ("S" ++ show n)
                            ]
 
 mkInvCompGates :: Int -> Int -> (Components, Gates)
 mkInvCompGates nin nreg = ([c], ii ++ is)
   where
-    c = crComp "INV" "not" 1
+    c = crComp' "INV" "not"
     ii = map (mki "I" 0) [1 .. nin] 
     is = map (mki "S" nin) [1 .. nreg]
-    mki sig offs n = crGate "INV" (n + offs) [ Connection "D1" (sig ++ show n)
+    mki sig offs n = crGate "INV" (n + offs) [ Connection "D" (sig ++ show n)
                                              , Connection "Q" (sig ++ show n ++ "b")
                                              ]
 
@@ -192,6 +192,16 @@ crComp nam typ nin =
             , cNrOut = 1
             , cPort = (Signal "Q" "std_logic" "out") : 
                       map (crSig "D" "in") [1 .. nin] 
+            }
+
+crComp' :: String -> String -> Component
+crComp' nam typ =
+  Component { cName = nam
+            , cType = typ
+            , cNrIn = 1
+            , cNrOut = 1
+            , cPort = [(Signal "Q" "std_logic" "out"), 
+                       (Signal "D" "std_logic" "in")]
             }
 
 crReg :: String -> Int -> Connections -> Register
