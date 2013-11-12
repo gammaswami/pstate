@@ -248,6 +248,8 @@ splitPort oport iport ports = (o, i)
 -- Create GateMap by looking up port map for each component type
 -- and then splitting signals into output and input names according
 -- to the port type
+--
+-- Beware: gName and gComp use switched due to error in Netlist/Read.hs
 ------------------------------------------------------------
 mkGateNameMap :: CompMap -> Gates -> GateMap
 mkGateNameMap compMap nlg = D.fromList (map f nlg)
