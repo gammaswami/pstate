@@ -168,10 +168,13 @@ xpGate
   = xpElem "gate" $
     xpWrap ( uncurry3 Gate,
              \g -> ( gName g, gComp g, gPortMap g )
+                   -- Beware: type and name switched,
+                   -- taken account for but should be fixed
+                   -- in RFSM/Gen.hs and PState/Data.hs
            ) $
-    xpTriple (xpAttr "type" xpText)
-             (xpAttr "name" xpText)
-             xpConnections
+    xpTriple (xpAttr "type" xpText) 
+             (xpAttr "name" xpText) 
+             xpConnections 
 
 xpAliases :: PU Aliases
 xpAliases
