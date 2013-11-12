@@ -11,6 +11,9 @@ module PState.Data
        , mkAllNet
        )
        where
+-- Just for testing with no-pdd in hBDD-CUDD
+bddSetProb _ _ = 0
+
 
 -- import Data.Boolean
 import Data.Boolean.CUDD
