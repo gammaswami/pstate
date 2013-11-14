@@ -11,9 +11,6 @@ module PState.Data
        , mkAllNet
        )
        where
--- Just for testing with no-pdd in hBDD-CUDD
-bddSetProb _ _ = 0
-
 
 -- import Data.Boolean
 import Data.Boolean.CUDD
@@ -369,3 +366,7 @@ mkAllNet nl = return net
         mr = mkPNetReg nl ms
         mg = mkPNetGate nl mr
         net = mkIndexNet mg
+
+-- Just for testing with no-pdd in hBDD-CUDD
+bddSetProb _ _ = 0
+
