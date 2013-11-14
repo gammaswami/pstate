@@ -130,5 +130,5 @@ getBDD (State _ _ _ _ _ _ bddo bddi) = [defBDD bddo, defBDD bddi]
 getBDD (Func _ _ _ _ _ _ bdd) = [defBDD bdd]
 
 -- Just for testing with no-pdd in hBDD-CUDD
-bddSetProb _ _ = 0
-bddGetProb _ = 0.5
+-- bddSetProb _ _ = 0
+-- bddGetProb _ = 0.5

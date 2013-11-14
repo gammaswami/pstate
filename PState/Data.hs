@@ -368,5 +368,5 @@ mkAllNet nl = return net
         net = mkIndexNet mg
 
 -- Just for testing with no-pdd in hBDD-CUDD
-bddSetProb _ _ = 0
+-- bddSetProb _ _ = 0
 
